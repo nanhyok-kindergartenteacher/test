@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="ko-KR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff9ed">
+  <title>말해 보세요!</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Arial Rounded MT Bold", "Noto Sans KR", "Malgun Gothic", "맑은 고딕", sans-serif;
+      color: #35445a;
+      background: #fff8e9;
+      font-synthesis: none;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      padding: 26px 20px 36px;
+      background-color: #fff8e9;
+      background-image: radial-gradient(#eadfca 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    button,
+    textarea {
+      font: inherit;
+    }
+
+    .app {
+      width: min(100%, 780px);
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .hero {
+      position: relative;
+      margin-bottom: 25px;
+    }
+
+    .hero::after {
+      position: absolute;
+      top: 10px;
+      right: 7%;
+      color: #f0a94c;
+      content: "✿";
+      font-size: 2.5rem;
+      transform: rotate(12deg);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin: 0 0 10px;
+      padding: 5px 15px 7px;
+      border: 2px dashed #e7b958;
+      border-radius: 18px 22px 17px 20px;
+      background: #fffdf6;
+      color: #8a682e;
+      font-size: 0.95rem;
+      font-weight: 800;
+      transform: rotate(-2deg);
+    }
+
+    h1 {
+      margin: 0;
+      color: #e46e58;
+      font-size: clamp(2.4rem, 7vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: -0.07em;
+      text-shadow: 2px 3px 0 #f8d895;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: #66745c;
+      font-size: clamp(1rem, 3vw, 1.15rem);
+      font-weight: 700;
+    }
+
+    .sentence-card {
+      position: relative;
+      display: grid;
+      min-height: clamp(230px, 36vh, 340px);
+      grid-template-rows: auto 1fr;
+      place-items: center;
+      padding: 24px clamp(20px, 6vw, 54px) 32px;
+      border: 3px dashed #e8c260;
+      border-radius: 34px 27px 38px 29px;
+      background: #fffefa;
+      box-shadow: 0 7px 0 #f0dfb8;
+      transform: rotate(-0.3deg);
+    }
+
+    .card-label {
+      justify-self: start;
+      padding: 6px 13px;
+      border-radius: 14px 17px 13px 15px;
+      background: #e8f4de;
+      color: #52714c;
+      font-size: 0.95rem;
+      font-weight: 800;
+      transform: rotate(-1deg);
+    }
+
+    #sentence {
+      width: 100%;
+      align-self: center;
+      margin: 0;
+      color: #35445a;
+      font-size: clamp(2.4rem, 9vw, 5.2rem);
+      font-weight: 900;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      word-break: keep-all;
+    }
+
+    #sentence.is-placeholder {
+      color: #a9a698;
+      font-size: clamp(1.7rem, 5vw, 2.8rem);
+    }
+
+    .spoken-char {
+      border-radius: 0.18em;
+      transition: background-color 100ms ease;
+    }
+
+    .spoken-char.is-active {
+      background: #ffe27b;
+      box-shadow: 0 0 0 3px #ffe27b;
+    }
+
+    .status {
+      display: table;
+      max-width: 100%;
+      min-height: 1.8em;
+      margin: 24px auto 17px;
+      padding: 9px 18px;
+      border: 2px dashed #a9c797;
+      border-radius: 20px 24px 19px 23px;
+      background: #f4f8e9;
+      color: #526647;
+      font-size: clamp(1rem, 3vw, 1.15rem);
+      font-weight: 800;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 17px;
+    }
+
+    .controls button {
+      min-height: 78px;
+      padding: 14px 28px;
+      border: 0;
+      border-radius: 24px 20px 26px 19px;
+      font-size: clamp(1.2rem, 4vw, 1.5rem);
+      font-weight: 900;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform 120ms ease, filter 120ms ease, background 120ms ease;
+    }
+
+    .controls button:hover {
+      filter: brightness(1.04);
+    }
+
+    .controls button:active {
+      transform: translateY(4px) scale(0.98);
+    }
+
+    .controls button:focus-visible,
+    textarea:focus-visible {
+      outline: 4px solid #35445a;
+      outline-offset: 4px;
+    }
+
+    #listenButton {
+      min-width: min(100%, 260px);
+      background: #ed7961;
+      box-shadow: 0 6px 0 #c85d4d;
+      color: #fff;
+    }
+
+    #listenButton.is-listening {
+      background: #72a86c;
+      box-shadow: 0 6px 0 #54814f;
+      animation: listening 1.2s ease-in-out infinite;
+    }
+
+    #readButton {
+      min-width: min(100%, 220px);
+      background: #ffd66f;
+      box-shadow: 0 6px 0 #dfad45;
+      color: #59451f;
+    }
+
+    .teacher-area {
+      margin: 34px auto 0;
+      padding: 18px 20px 20px;
+      border: 2px dashed #e2bd63;
+      border-radius: 25px 20px 27px 22px;
+      background: #fff3cc;
+      text-align: left;
+      transform: rotate(0.25deg);
+    }
+
+    .teacher-area label {
+      display: block;
+      margin: 0 0 10px 2px;
+      color: #795b2e;
+      font-size: 1.05rem;
+      font-weight: 900;
+    }
+
+    #teacherText {
+      display: block;
+      width: 100%;
+      min-height: 100px;
+      padding: 12px 16px;
+      border: 2px solid #c9dadd;
+      border-radius: 15px 12px 17px 13px;
+      background-color: #fff;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 31px,
+        #e6eff0 32px,
+        #e6eff0 33px
+      );
+      color: #35445a;
+      font-size: 1.15rem;
+      line-height: 33px;
+      resize: vertical;
+    }
+
+    @keyframes listening {
+      50% { transform: scale(1.04); }
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 20px 14px 28px;
+      }
+
+      .hero {
+        margin-bottom: 21px;
+      }
+
+      .hero::after {
+        top: 5px;
+        right: 2%;
+        font-size: 1.8rem;
+      }
+
+      .sentence-card {
+        min-height: 250px;
+        border-radius: 27px 22px 30px 24px;
+      }
+
+      .controls {
+        gap: 13px;
+      }
+
+      .controls button {
+        width: 100%;
+      }
+
+      .teacher-area {
+        margin-top: 30px;
+        padding: 16px 14px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <p class="eyebrow">오늘의 말하기 놀이터</p>
+      <h1>말해 보세요!</h1>
+      <p class="subtitle">천천히 또박또박, 내 목소리로!</p>
+    </header>
+
+    <section class="sentence-card" aria-label="인식된 문장">
+      <span class="card-label" aria-hidden="true">💬 내가 한 말</span>
+      <p id="sentence" class="is-placeholder" aria-live="polite">마이크를 누르고 말해 보세요!</p>
+    </section>
+
+    <p id="status" class="status" role="status" aria-live="polite">마이크를 누르면 시작해요.</p>
+
+    <div class="controls">
+      <button id="listenButton" type="button" aria-pressed="false">🎙️ 말하기</button>
+      <button id="readButton" type="button">🔊 읽어 주기</button>
+    </div>
+
+    <section class="teacher-area">
+      <label for="teacherText">✏️ 선생님이 고쳐 쓰는 곳</label>
+      <textarea id="teacherText" lang="ko-KR" placeholder="인식된 문장이 여기에 나타나요." spellcheck="false"></textarea>
+    </section>
+  </main>
+
+  <script>
+    // 화면 요소와 음성 기능을 연결합니다.
+    const sentenceElement = document.getElementById("sentence");
+    const statusElement = document.getElementById("status");
+    const listenButton = document.getElementById("listenButton");
+    const readButton = document.getElementById("readButton");
+    const teacherText = document.getElementById("teacherText");
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    let recognition = null;
+    let isListening = false;
+    let heardSpeech = false;
+    let recognitionError = null;
+    let utterance = null;
+    let highlightTimer = null;
+
+    // 문장을 글자별로 나누어 읽는 동안 현재 글자를 표시합니다.
+    function renderSentence(text) {
+      sentenceElement.replaceChildren();
+      sentenceElement.classList.toggle("is-placeholder", text.length === 0);
+
+      if (!text) {
+        sentenceElement.textContent = "마이크를 누르고 말해 보세요!";
+        sentenceElement.classList.add("is-placeholder");
+        return;
+      }
+
+      let offset = 0;
+      for (const character of text) {
+        const span = document.createElement("span");
+        span.className = "spoken-char";
+        span.dataset.start = String(offset);
+        span.dataset.end = String(offset + character.length);
+        span.textContent = character;
+        sentenceElement.append(span);
+        offset += character.length;
+      }
+    }
+
+    // 입력창의 문장을 큰 글자 영역에 바로 반영합니다.
+    teacherText.addEventListener("input", () => {
+      renderSentence(teacherText.value);
+      if (utterance) {
+        stopReading();
+      }
+    });
+
+    function setListening(listening) {
+      isListening = listening;
+      listenButton.classList.toggle("is-listening", listening);
+      listenButton.setAttribute("aria-pressed", String(listening));
+      listenButton.textContent = listening ? "👂 듣고 있어요" : "🎙️ 말하기";
+    }
+
+    // 음성 인식 결과가 없거나 사용할 수 없을 때 쉬운 안내를 보여 줍니다.
+    function showRecognitionError(error) {
+      const messages = {
+        "not-allowed": "마이크를 사용할 수 없어요. 선생님께 마이크 권한을 부탁해요.",
+        "service-not-allowed": "음성 인식을 사용할 수 없어요. 선생님께 도움을 부탁해요.",
+        "audio-capture": "마이크를 찾을 수 없어요. 마이크가 연결되어 있는지 확인해 주세요.",
+        "no-speech": "아무 말도 들리지 않았어요. 다시 말해 볼까요?",
+        "network": "음성 인식에 문제가 생겼어요. 인터넷을 확인하고 다시 해 봐요."
+      };
+      statusElement.textContent = messages[error] || "잘 듣지 못했어요. 다시 말해 볼까요?";
+    }
+
+    function startListening() {
+      if (!SpeechRecognition) {
+        statusElement.textContent = "이 브라우저에서는 음성 인식을 할 수 없어요. 선생님께 도움을 부탁해요.";
+        return;
+      }
+
+      if (utterance) {
+        stopReading();
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.lang = "ko-KR";
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      heardSpeech = false;
+      recognitionError = null;
+
+      recognition.onstart = () => {
+        setListening(true);
+        statusElement.textContent = "천천히 또박또박 말해 보세요.";
+      };
+
+      recognition.onresult = (event) => {
+        let transcript = "";
+        for (let index = 0; index < event.results.length; index += 1) {
+          transcript += event.results[index][0].transcript;
+          if (event.results[index].isFinal) {
+            heardSpeech = true;
+          }
+        }
+        transcript = transcript.trim();
+        if (transcript) {
+          teacherText.value = transcript;
+          renderSentence(transcript);
+          statusElement.textContent = heardSpeech ? "잘했어요! 문장을 확인해 보세요." : "잘 듣고 있어요...";
+        }
+      };
+
+      recognition.onerror = (event) => {
+        recognitionError = event.error;
+        showRecognitionError(event.error);
+      };
+
+      recognition.onend = () => {
+        setListening(false);
+        recognition = null;
+        if (!heardSpeech && !recognitionError) {
+          statusElement.textContent = "다시 말해 볼까요?";
+        } else if (heardSpeech) {
+          statusElement.textContent = "잘했어요! 문장을 확인해 보세요.";
+        }
+      };
+
+      try {
+        recognition.start();
+      } catch (error) {
+        recognition = null;
+        setListening(false);
+        statusElement.textContent = "마이크를 시작할 수 없어요. 잠시 후 다시 눌러 주세요.";
+      }
+    }
+
+    function stopListening() {
+      if (recognition && isListening) {
+        recognition.stop();
+      }
+    }
+
+    listenButton.addEventListener("click", () => {
+      if (isListening) {
+        stopListening();
+      } else {
+        startListening();
+      }
+    });
+
+    function clearHighlight() {
+      if (highlightTimer !== null) {
+        window.clearInterval(highlightTimer);
+        highlightTimer = null;
+      }
+      sentenceElement.querySelectorAll(".is-active").forEach((span) => {
+        span.classList.remove("is-active");
+      });
+    }
+
+    function highlightWord(characterIndex, wordRanges) {
+      const wordRange =
+        wordRanges.find((range) => characterIndex >= range.start && characterIndex < range.end) ||
+        wordRanges.find((range) => range.start >= characterIndex);
+      const spans = sentenceElement.querySelectorAll(".spoken-char");
+      spans.forEach((span) => {
+        const start = Number(span.dataset.start);
+        const end = Number(span.dataset.end);
+        const active = wordRange && start < wordRange.end && end > wordRange.start;
+        span.classList.toggle("is-active", active);
+      });
+    }
+
+    function stopReading() {
+      clearHighlight();
+      window.speechSynthesis.cancel();
+      utterance = null;
+    }
+
+    // 읽기 경계 이벤트를 우선 사용하고, 이벤트가 없으면 글자별 타이머로 표시합니다.
+    function readSentence() {
+      const text = teacherText.value.trim();
+      if (!text) {
+        statusElement.textContent = "먼저 읽을 문장을 말하거나 적어 주세요.";
+        return;
+      }
+      if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+        statusElement.textContent = "이 브라우저에서는 소리 내어 읽을 수 없어요.";
+        return;
+      }
+
+      stopReading();
+      const currentUtterance = new SpeechSynthesisUtterance(text);
+      utterance = currentUtterance;
+      currentUtterance.lang = "ko-KR";
+      currentUtterance.rate = 0.82;
+      currentUtterance.pitch = 1.05;
+
+      const voices = window.speechSynthesis.getVoices();
+      const koreanVoice = voices.find((voice) => voice.lang.toLowerCase().startsWith("ko"));
+      if (koreanVoice) {
+        currentUtterance.voice = koreanVoice;
+      }
+
+      let receivedBoundary = false;
+      let fallbackIndex = 0;
+      const characters = Array.from(text);
+      const wordRanges = [];
+      const wordPattern = /\S+/gu;
+      let wordMatch;
+      while ((wordMatch = wordPattern.exec(text)) !== null) {
+        wordRanges.push({ start: wordMatch.index, end: wordPattern.lastIndex });
+      }
+      const characterOffsets = [];
+      let characterOffset = 0;
+      characters.forEach((character) => {
+        characterOffsets.push(characterOffset);
+        characterOffset += character.length;
+      });
+      const fallbackDelay = 230;
+      highlightTimer = window.setInterval(() => {
+        if (receivedBoundary) {
+          return;
+        }
+        if (fallbackIndex < characters.length) {
+          if (!/\s/u.test(characters[fallbackIndex])) {
+            highlightWord(characterOffsets[fallbackIndex], wordRanges);
+          }
+          fallbackIndex += 1;
+        }
+      }, fallbackDelay);
+
+      currentUtterance.onboundary = (event) => {
+        if (typeof event.charIndex !== "number") {
+          return;
+        }
+        receivedBoundary = true;
+        if (highlightTimer !== null) {
+          window.clearInterval(highlightTimer);
+          highlightTimer = null;
+        }
+        highlightWord(event.charIndex, wordRanges);
+      };
+
+      currentUtterance.onend = () => {
+        if (utterance !== currentUtterance) {
+          return;
+        }
+        clearHighlight();
+        utterance = null;
+        statusElement.textContent = "다 읽었어요!";
+      };
+
+      currentUtterance.onerror = () => {
+        if (utterance !== currentUtterance) {
+          return;
+        }
+        clearHighlight();
+        utterance = null;
+        statusElement.textContent = "소리 내어 읽을 수 없어요. 다시 눌러 주세요.";
+      };
+
+      statusElement.textContent = "문장을 읽어 줄게요.";
+      window.speechSynthesis.speak(currentUtterance);
+    }
+
+    readButton.addEventListener("click", readSentence);
+  </script>
+</body>
+</html>
